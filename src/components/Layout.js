@@ -4,7 +4,7 @@ import React, { useContext, useEffect, useState } from 'react'
 import { Store } from '../../utils/store'
 
 const Layout = ({ children, title }) => {
-  const { state, dispatch } = useContext(Store);
+  const { state } = useContext(Store);
   const { cart: { cartItems } } = state;
   const [cartItemsCount, setCartItemsCount] = useState(0);
 

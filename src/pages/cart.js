@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { XCircleIcon } from '@heroicons/react/outline'
 import { useRouter } from 'next/router';
-
+import dynamic from 'next/dynamic';
 
 const Cart = () => {
   const { state, dispatch } = useContext(Store);
@@ -16,9 +16,14 @@ const Cart = () => {
     dispatch({ type: 'REMOVE_FROM_CART', payload: item })
   }
 
+  const updateCartHandler = (item, qty) => {
+    const quantity = Number(qty);
+    dispatch({ type: 'ADD_TO_CART', payload: { ...item, quantity } });
+  };
+
   return (
     <Layout title={"Shopping Cart"}>
-      <h1 className='mb-4 text-xl'>Shopping Cart</h1>
+      <h1 className='mb-10 text-2xl font-bold'>Shopping Cart</h1>
       {
         cartItems.length === 0 ?
           (
@@ -41,7 +46,7 @@ const Cart = () => {
                     {cartItems.map((item) => (
                       <tr key={item.slug} className='border-b'>
                         <td>
-                          <Link href={`/product/${item.slug}`} className='flex items-center'>
+                          <Link href={`/product/${item.slug}`} className='flex flex-col sm:flex-row items-center'>
                             <Image
                               width={50}
                               height={50}
@@ -51,7 +56,20 @@ const Cart = () => {
                             {item.name}
                           </Link>
                         </td>
-                        <td className='p-5 text-right'>{item.quantity}</td>
+                        <td className='p-5 text-right'>
+                          <select
+                            value={item.quantity}
+                            onChange={(e) =>
+                              updateCartHandler(item, e.target.value)
+                            }
+                          >
+                            {[...Array(item.countInStock).keys()].map((x) => (
+                              <option key={x + 1} value={x + 1}>
+                                {x + 1}
+                              </option>
+                            ))}
+                          </select>
+                        </td>
                         <td className='p-5 text-right'>${item.price}</td>
                         <td className='p-5 text-center'>
                           <button onClick={() => removeFromCart(item)}>
@@ -63,13 +81,13 @@ const Cart = () => {
                   </tbody>
                 </table>
               </div>
-              <div className='card p-5 mt-5 sm:mt-0 h-[8rem]'>
+              <div className='card p-5 mt-5 sm:mt-0 h-[9rem]'>
                 <ul>
                   <li>
                     <div className='pb-3'>
-                      {/* Subtotal ({cartItems.reduce((a, c) => (a + c.quantity, 0))}){' '}
-                      : */}
-                      Total Price: ${cartItems.reduce((a, c) => a + c.quantity * c.price, 0)}
+                      Total Items: <strong>{cartItems.reduce((a, c) => a + c.quantity, 0)}</strong>
+                      <br />
+                      Total Price: <strong>${cartItems.reduce((a, c) => a + c.quantity * c.price, 0)}</strong>
                     </div>
                   </li>
                   <li>
@@ -86,4 +104,5 @@ const Cart = () => {
   )
 }
 
-export default Cart
+// eslint-disable-next-line no-undef
+export default dynamic(() => Promise.resolve(Cart), { ssr: false }) 
